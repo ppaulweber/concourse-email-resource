@@ -158,15 +158,7 @@ func Execute(sourceRoot, version string, input []byte) (string, error) {
 
 	var c *smtp.Client
 	var wc io.WriteCloser
-	c, err = smtp.Dial(fmt.Sprintf("%s:%s", indata.Source.SMTP.Host, indata.Source.SMTP.Port))
-	if err != nil {
-		return "", err
-	}
-	defer c.Close()
 
-	if err = c.Hello("localhost"); err != nil {
-		return "", err
-	}
 	if !indata.Source.SMTP.Anonymous {
 		auth := smtp.PlainAuth(
 			"",
@@ -177,22 +169,28 @@ func Execute(sourceRoot, version string, input []byte) (string, error) {
 
 		c, err = smtp.Dial(fmt.Sprintf("%s:%s", indata.Source.SMTP.Host, indata.Source.SMTP.Port))
 		if err != nil {
-			return "", err
+			return "dial", err
 		}
 
 		config := tlsConfig( indata )
 		c.StartTLS( config )
 
 		if err = c.Auth(auth); err != nil {
-			return "", err
+			return "auth", err
+		}
+	} else {
+		c, err = smtp.Dial(fmt.Sprintf("%s:%s", indata.Source.SMTP.Host, indata.Source.SMTP.Port))
+		if err != nil {
+			return "dial", err
 		}
 	}
+
 	if err = c.Mail(indata.Source.From); err != nil {
-		return "", err
+		return "mail", err
 	}
 	for _, addr := range indata.Source.To {
 		if err = c.Rcpt(addr); err != nil {
-			return "", err
+			return "rcpt", err
 		}
 	}
 	wc, err = c.Data()
