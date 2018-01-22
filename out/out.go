@@ -167,12 +167,6 @@ func Execute(sourceRoot, version string, input []byte) (string, error) {
 	if err = c.Hello("localhost"); err != nil {
 		return "", err
 	}
-	if ok, _ := c.Extension("STARTTLS"); ok {
-		; err != nil {
-			return "", err
-		}
-	}
-
 	if !indata.Source.SMTP.Anonymous {
 		auth := smtp.PlainAuth(
 			"",
