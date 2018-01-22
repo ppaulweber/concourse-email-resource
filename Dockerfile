@@ -1,4 +1,4 @@
-FROM progrium/busybox
+FROM billyteves/alpine-golang-glide
 
 RUN glide install && \
     go build -o bin/check check/cmd/*.go && \
