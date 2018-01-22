@@ -168,9 +168,7 @@ func Execute(sourceRoot, version string, input []byte) (string, error) {
 		return "", err
 	}
 	if ok, _ := c.Extension("STARTTLS"); ok {
-		config := tlsConfig(indata)
-
-		if err = c.StartTLS(config); err != nil {
+		; err != nil {
 			return "", err
 		}
 	}
@@ -182,12 +180,17 @@ func Execute(sourceRoot, version string, input []byte) (string, error) {
 			indata.Source.SMTP.Password,
 			indata.Source.SMTP.Host,
 		)
-		if auth != nil {
-			if ok, _ := c.Extension("AUTH"); ok {
-				if err = c.Auth(auth); err != nil {
-					return "", err
-				}
-			}
+
+		c, err = smtp.Dial(fmt.Sprintf("%s:%s", indata.Source.SMTP.Host, indata.Source.SMTP.Port))
+		if err != nil {
+			return "", err
+		}
+
+		config := tlsConfig( indata )
+		c.StartTLS( config )
+
+		if err = c.Auth(auth); err != nil {
+			return "", err
 		}
 	}
 	if err = c.Mail(indata.Source.From); err != nil {
